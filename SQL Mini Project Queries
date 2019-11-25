@@ -1,0 +1,198 @@
+QUESTION 1.1
+
+USE NORTHWND; --USE forces the query to use the NORTHWND database
+
+SELECT CustomerID AS 'Customer ID', --SELECT is what is used to choose what will be displayed
+       CompanyName AS 'Company Name', --The columns are chosen from a table and can be aliased with AS and then surrounding the name with ''
+       Address,
+       City,
+       Region,
+       PostalCode AS 'Postal Code',
+       Country
+FROM Customers --FROM is used to state where the data will be taken from
+WHERE City = 'London' --WHERE applies conditions on the data that will be shown
+   OR City = 'Paris'; --OR is used to display data that has any condition on either side of it as true
+
+QUESTION 1.2
+
+USE NORTHWND;
+
+SELECT ProductName AS 'Product Name',
+       QuantityPerUnit AS 'Quantity Per Unit'
+FROM Products
+WHERE QuantityPerUnit LIKE '%bottles'; --LIKE will return data that contains a specified word. % are used as wildcards in order to indicate there could be other characters on the side it is put on
+
+QUESTION 1.3
+
+USE NORTHWND;
+
+SELECT ProductName AS 'Product Name',
+       QuantityPerUnit AS 'Quantity Per Unit',
+       CompanyName AS 'Company Name',
+       ContactTitle AS 'Contact Title',
+       ContactName AS 'Contact Name',
+       Country
+FROM Products
+JOIN Suppliers ON Products.SupplierID = Suppliers.SupplierID --JOIN will connect the stated table with the one in the FROM statement by using a related column
+WHERE QuantityPerUnit LIKE '%bottles';
+
+QUESTION 1.4
+
+USE NORTHWND;
+
+SELECT CategoryName AS 'Category Name',
+       SUM(UnitsInStock) AS 'Products In Stock' --SUM will add the rows in a given column, which can be dependent on other columns. In this case, CategoryName
+FROM Categories
+JOIN Products ON Products.CategoryID = Categories.CategoryID
+GROUP BY CategoryName; --GROUP BY will group rows with the same value into one based on the specified columns
+
+QUESTION 1.5
+
+USE NORTHWND;
+
+SELECT CONCAT(TitleOfCourtesy, ' ', FirstName, ' ', LastName) AS 'UK Employees', --CONCAT will pair up  multiple columns and their respective data into one column
+       City AS 'City of Residence'
+FROM Employees
+WHERE Country = 'UK';
+
+QUESTION 1.6
+
+USE NORTHWND;
+
+SELECT Region.RegionDescription AS 'Region',
+       SUM(ROUND(UnitPrice * Quantity, 2)) AS 'Gross Sales', --ROUND will round the value to a specified amount of decimal places, in this case being 2
+       SUM(ROUND(UnitPrice * Quantity * Discount, 2)) AS 'Sales Discount', --* is used to multiply the rows of columns together
+       ROUND(SUM(DISTINCT Freight), 2) AS 'Total Freight', --DISTINCT will choose only values that are different to one another
+       SUM(ROUND(UnitPrice * Quantity - (UnitPrice * Quantity * Discount), 2)) - ROUND(SUM(DISTINCT Freight), 2) AS 'Sales Total'
+FROM Territories
+JOIN Region ON Region.RegionID = Territories.RegionID
+JOIN EmployeeTerritories ON EmployeeTerritories.TerritoryID = Territories.TerritoryID
+JOIN Orders ON Orders.EmployeeID = EmployeeTerritories.EmployeeID
+JOIN [Order Details] ON [Order Details].OrderID = Orders.OrderID
+GROUP BY RegionDescription
+HAVING SUM(ROUND(UnitPrice * Quantity - (UnitPrice * Quantity * Discount), 2)) - ROUND(SUM(DISTINCT Freight), 2) > 1000000; --HAVING is the same as WHERE, but only used after a GROUP BY statement
+
+QUESTION 1.7
+
+USE NORTHWND;
+
+SELECT 'USA or UK' AS 'Freight Orders Over 100.00', --This will return a row with a respective column
+       COUNT(*) AS 'No. of Orders' --COUNT will return a number based on the number of rows that meet specified criteria
+FROM Orders
+WHERE Freight > 100 --Here only rows with Freight over 100 will show
+  AND (ShipCountry = 'USA' OR ShipCountry = 'UK'); --AND is used to display data that has both conditions on either side of it as true
+
+QUESTION 1.8
+
+USE NORTHWND;
+
+SELECT TOP 1 --TOP will only return a specified number of rows based on conditions
+       Orders.OrderID AS 'Order ID',
+       Discount,
+       UnitPrice AS 'Unit Price',
+       Quantity,
+       ROUND(UnitPrice * Quantity * Discount, 2) AS 'Discount Applied'
+FROM Orders
+JOIN [Order Details] ON [Order Details].OrderID = Orders.OrderID
+ORDER BY ROUND(UnitPrice * Quantity * Discount, 2) DESC; --ORDER BY will sort the data based on the columns stated. This can be done in ascending (ASC) or descending (DESC) order
+
+QUESTION 2.1
+
+CREATE DATABASE Spartans; --CREATE DATABASE will make a new database will a specified name
+
+USE Spartans;
+
+CREATE TABLE [Spartans Table] --CREATE TABLE will make a new table in an assigned database, where column names and their respective datatypes are set
+                              (
+                              SpartanID INT, --INT is the integer datatype
+                              Title VARCHAR(4), --VARCHAR is the variable legnth datatype, where the number assined is the max amount of characters. The max is 255
+                              FirstName VARCHAR(255),
+                              LastName VARCHAR(255),
+                              UniversityAttended VARCHAR(255),
+                              CourseTaken VARCHAR(255),
+                              MarkAchieved CHAR(3), --CHAR is the fixed length datatype, where the number assigned is the number of characters the data must be in the column
+                              Personality VARCHAR(255)
+                  PRIMARY KEY (SpartanID) --PRIMARY KEY sets a column to be the one that uniquely identifies each record in the table
+                              );
+
+QUESTION 2.2
+
+INSERT INTO [Spartans Table] (SpartanID, Title, FirstName, LastName, UniversityAttended, CourseTaken, MarkAchieved, Personality) --INSERT INTO is what is used to add rows of data to columns in a table
+VALUES (1, 'Mr', 'Shaqil', 'Abdullah', 'Brunel', 'Mechanical Engineering', '2:1', 'Protagonist'), --VALUES is where the data that will be put in the columns is specified
+       (2, 'Mr', 'Paul', 'Brewer', 'Hull', 'Computer Science', '1st', 'Mediator'),
+       (3, 'Mr', 'Thomas', 'Briggs', 'Bournemouth', 'Exercise Science', '1st', 'Campaigner'),
+       (4, 'Mr', 'Jack', 'Farmer', 'Leeds', 'Physics', '2:1', 'Advocate'),
+       (5, 'Mr', 'Hussain', 'Fiaz', 'University of East London', 'Computer Science', '2:2', 'Logician'),
+       (6, 'Miss', 'Ariadna', 'Gonzalez Lopez', 'London Metropolitan', 'Business Information Technology', '1st', 'Consul'),
+       (7, 'Mr', 'Victor', 'Granados Jimenez', 'Granada', 'Information and Documentation', '2:1', 'Logistician'),
+       (8, 'Mr', 'Zaid', 'Iqbal', 'Queen Mary', 'Computer Science', '2:1', 'Protagonist'),
+       (9, 'Mr', 'Mohammad', 'Khwaja', 'Westminster', 'Electronic Engineer', '2:2', 'Logician'),
+       (10, 'Mr', 'Daniel', 'Lippross', 'Hull', 'Chemistry', '2:2', 'Protagonist'),
+       (11, 'Mr', 'Javier', 'Martinez Romero', 'Royal Holloway', 'Mathematics', '3rd', 'Advocate'),
+       (12, 'Miss', 'Elizabeth', 'Nicholl', 'Cantebury Christ Church University', 'Sport and Exercise', '1st', 'Protagonist'),
+       (13, 'Mr', 'Anjum Ali', 'Saiyad', 'Queen Mary', 'Mathematics', '2:2', 'Advocate'),
+       (14, 'Mr', 'Joyel', 'Shaju','Coventry', 'Computer Science', '1st', 'Protagonist'),
+       (15, 'Mr', 'Ygor', 'Teixeira', 'University of Greenwhich', 'Games Design and Development', '2:2', 'Advocate');
+
+QUESTION 3.1
+
+USE NORTHWND;
+
+SELECT EmployeeID AS 'Employee ID',
+       FirstName + ' ' + LastName AS 'Employee', --+ can also be used to concatonate non-numeric columns 
+       CASE WHEN ReportsTo = 1 THEN 'Nancy Davolio' --CASE will return different results based on given conditions
+            WHEN ReportsTo = 2 THEN 'Andrew Fuller' --WHEN and THEN determine what the condition is and what will be returned if that condition is met
+            WHEN ReportsTo = 3 THEN 'Janet Leverling'
+            WHEN ReportsTo = 4 THEN 'Margaret Peacock'
+            WHEN ReportsTo = 5 THEN 'Steven Buchanan'
+            WHEN ReportsTo = 6 THEN 'Michael Suyama'
+            WHEN ReportsTo = 7 THEN 'Robert King'
+            WHEN ReportsTo = 8 THEN 'Laura Callahan'
+            WHEN ReportsTo = 9 THEN 'Anne Dodsworth' 
+            ELSE NULL --ELSE is what will be returned if the data doesn't match with any of the previously stated conditions
+       END AS 'Reports To' --END concludes the CASE and assigns the column a name
+FROM Employees;
+
+QUESTION 3.2
+
+USE NORTHWND;
+
+SELECT CompanyName AS 'Company',
+       SUM(ROUND(Products.UnitPrice * Quantity - (Products.UnitPrice * Quantity * Discount), 2)) - ROUND(SUM(DISTINCT Freight), 2) AS 'Total Sales'
+FROM Suppliers
+JOIN Products ON Products.SupplierID = Suppliers.SupplierID
+JOIN [Order Details] ON [Order Details].ProductID = Products.ProductID
+JOIN Orders ON Orders.OrderID = [Order Details].OrderID
+GROUP BY CompanyName
+HAVING SUM(ROUND(Products.UnitPrice * Quantity - (Products.UnitPrice * Quantity * Discount), 2)) - ROUND(SUM(DISTINCT Freight), 2) > 10000;
+
+QUESTION 3.3
+
+USE NORTHWND;
+
+SELECT TOP 10 
+       Customers.CustomerID AS 'Customer ID',
+       CompanyName AS 'Company',
+       ContactName AS 'Contact Name',
+       SUM(ROUND(UnitPrice * Quantity - (UnitPrice * Quantity * Discount), 2)) - ROUND(SUM(DISTINCT Freight), 2) AS 'Customer YTD'
+FROM [Order Details]
+JOIN Orders ON Orders.OrderID = [Order Details].OrderID
+JOIN Customers ON Customers.CustomerID = Orders.CustomerID
+WHERE OrderDate >= '1998-01-01'
+  AND ShippedDate IS NOT NULL --NULL labels a value as unknown. Here values that do not have a NULL value will be shown
+GROUP BY Customers.CustomerID,
+         CompanyName,
+         ContactName
+ORDER BY SUM(ROUND(UnitPrice * Quantity - (UnitPrice * Quantity * Discount), 2)) - ROUND(SUM(DISTINCT Freight), 2) DESC;
+
+QUESTION 3.4
+
+USE NORTHWND;
+
+SELECT CONCAT(MONTH(ShippedDate), '-', YEAR(ShippedDate) - 1900) AS 'Shipping Year And Month', --MONTH AND YEAR will return the numeric value of the month and year respectively
+       AVG(DAY(ShippedDate)) AS 'Average Shipping Day' --AVG will calculate the average of a numeric column
+FROM [Order Details]
+JOIN Orders ON Orders.OrderID = [Order Details].OrderID
+GROUP BY MONTH(ShippedDate),
+         YEAR(ShippedDate)
+HAVING YEAR(ShippedDate) IS NOT NULL;
